@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/xuri/excelize/v2"
+	"gopkg.in/yaml.v3"
 )
 
 type DataCoin struct {
@@ -18,7 +19,11 @@ type DataCoin struct {
 	MarcetCapitalization int     `json:"market_cap"`
 }
 
-/*Add the ability to configure the ability to get information about the coins.*/
+type Config struct {
+	TypeWallet    string `yaml:"TypeWallet"`
+	NumberOfCoins int64  `yaml:"NumberOfCoins"`
+	PathToFolder  string `yaml:"PathToFolder"`
+}
 
 func main() {
 	timeStart := time.Now()
@@ -43,7 +48,7 @@ func main() {
 
 		err = json.Unmarshal(body, &data)
 		if err != nil {
-			panic(err)
+			log.Println(err)
 		}
 
 		for _, val := range data {
@@ -54,22 +59,38 @@ func main() {
 		}
 		i++
 
-		// Add more process
+		// Add more process ... wait..
 		for idxN, valN := range nameList {
-			f.SetCellValue("List", fmt.Sprintf("A%d", idxN+1), valN)
+			f.SetCellValue("CoinList", fmt.Sprintf("A%d", idxN+1), valN)
 		}
 		for idxS, valS := range simbolList {
-			f.SetCellValue("List", fmt.Sprintf("B%d", idxS+1), valS)
+			f.SetCellValue("CoinList", fmt.Sprintf("B%d", idxS+1), valS)
 		}
 		for idxP, valP := range priceList {
-			f.SetCellValue("List", fmt.Sprintf("C%d", idxP+1), valP)
+			f.SetCellValue("CoinList", fmt.Sprintf("C%d", idxP+1), valP)
 		}
 		for idxC, valC := range capList {
-			f.SetCellValue("List", fmt.Sprintf("D%d", idxC+1), valC)
+			f.SetCellValue("CoinList", fmt.Sprintf("D%d", idxC+1), valC)
 		}
 	}
 	if err := f.SaveAs("Coins.xlsx"); err != nil {
 		fmt.Println(err)
 	}
+	// 2.325321123s or 3.132414124s or 4.015732478s
 	fmt.Println(time.Since(timeStart))
+}
+
+// Parce userConfig yaml
+func ParceUserConfig() (error, string, int64, string) {
+	var conf Config
+	file, err := ioutil.ReadFile("./config/config.yaml")
+	if err != nil {
+		return fmt.Errorf("err read config file - %s", err), "", 0, ""
+	}
+	err = yaml.Unmarshal(file, &conf)
+	if err != nil {
+		return fmt.Errorf("err parce config file - %s", err), "", 0, ""
+	}
+
+	return nil, conf.TypeWallet, conf.NumberOfCoins, conf.PathToFolder
 }

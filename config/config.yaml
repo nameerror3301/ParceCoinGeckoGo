@@ -1,3 +1,8 @@
+# usd eur ...
+TypeWallet: "" 
 
-TypeWallet: ""
+# The number of coins you want to get 100...200...300...1000
 NumberOfCoins: 0
+
+# The path where the file with the information will be saved. If you do not specify a path, the file will lie next to the program
+PathToFolder: ""

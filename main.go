@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/xuri/excelize/v2"
 )
@@ -17,12 +18,10 @@ type DataCoin struct {
 	MarcetCapitalization int     `json:"market_cap"`
 }
 
-type Config struct {
-}
-
 /*Add the ability to configure the ability to get information about the coins.*/
 
 func main() {
+	timeStart := time.Now()
 	f := excelize.NewFile()
 	var nameList []string
 	var simbolList []string
@@ -72,4 +71,5 @@ func main() {
 	if err := f.SaveAs("Coins.xlsx"); err != nil {
 		fmt.Println(err)
 	}
+	fmt.Println(time.Since(timeStart))
 }

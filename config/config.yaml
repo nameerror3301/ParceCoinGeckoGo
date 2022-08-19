@@ -1,8 +1,8 @@
-# usd eur ...
-TypeWallet: "" 
+# Enter any currency of your choice Dollars, Euros, Yen...
+TypeWallet: "eur" 
 
-# The number of coins you want to get 100...200...300...1000
-NumberOfCoins: 0
+# Enter the number of pages from which to collect data...
+NumbersOfCoins: 5
 
-# The path where the file with the information will be saved. If you do not specify a path, the file will lie next to the program
-PathToFolder: ""
+# Path where the file will be saved...
+PathToFolder: "/home/onebyteforlife/go/src"

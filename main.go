@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"path/filepath"
 	"time"
 
 	"github.com/xuri/excelize/v2"
@@ -16,31 +17,52 @@ type DataCoin struct {
 	CoinName             string  `json:"name"`
 	CoinSimbol           string  `json:"symbol"`
 	CoinPrice            float64 `json:"current_price"`
-	MarcetCapitalization int     `json:"market_cap"`
+	MarcetCapitalization float32 `json:"market_cap"`
 }
 
 type Config struct {
-	TypeWallet    string `yaml:"TypeWallet"`
-	NumberOfCoins int64  `yaml:"NumberOfCoins"`
-	PathToFolder  string `yaml:"PathToFolder"`
+	TypeWallet     string `yaml:"TypeWallet"`
+	NumbersOfCoins int    `yaml:"NumbersOfCoins"`
+	PathToFolder   string `yaml:"PathToFolder"`
 }
+
+var (
+	NameList   []string
+	SimbolList []string
+	PriceList  []float64
+	CapList    []float32
+)
 
 func main() {
 	timeStart := time.Now()
 	f := excelize.NewFile()
-	var nameList []string
-	var simbolList []string
-	var priceList []float64
-	var capList []int
 	var data []DataCoin
 
+	err, typeWallet, numCoins, pathToSave := ParceUserConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if typeWallet == "eur" || typeWallet == "usd" {
+		fmt.Printf("The currency of your choice - %s\n", typeWallet)
+	} else {
+		log.Fatal("The currency you selected was not recognized")
+	}
+
+	if numCoins >= 1 || numCoins <= 130 {
+		fmt.Printf("Number of pages from which the information will be collected - %d\n", numCoins)
+	} else {
+		log.Fatal("The number of pages can not be more than 130 or less than/equal to zero.")
+	}
+
 	// Fix this Crutch
-	for i := 1; i < 11; {
-		url := fmt.Sprintf("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=%d&sparkline=false", i)
+	for i := 1; i < numCoins+1; {
+		url := fmt.Sprintf("https://api.coingecko.com/api/v3/coins/markets?vs_currency=%s&order=market_cap_desc&per_page=100&page=%d&sparkline=false", typeWallet, i)
 		resp, err := http.Get(url)
 		if err != nil {
 			log.Println(err)
 		}
+
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			log.Println(err)
@@ -48,40 +70,47 @@ func main() {
 
 		err = json.Unmarshal(body, &data)
 		if err != nil {
-			log.Println(err)
+			log.Println("The maximum number of requests per minute was exceeded. Performing blocking bypass...")
+			time.Sleep(90 * time.Second)
 		}
+		fmt.Printf("Visited page - %d of %d\n", i, numCoins)
 
 		for _, val := range data {
-			nameList = append(nameList, val.CoinName)
-			priceList = append(priceList, val.CoinPrice)
-			simbolList = append(simbolList, val.CoinSimbol)
-			capList = append(capList, val.MarcetCapitalization)
+			NameList = append(NameList, val.CoinName)
+			PriceList = append(PriceList, val.CoinPrice)
+			SimbolList = append(SimbolList, val.CoinSimbol)
+			CapList = append(CapList, val.MarcetCapitalization)
 		}
-		i++
 
 		// Add more process ... wait..
-		for idxN, valN := range nameList {
-			f.SetCellValue("CoinList", fmt.Sprintf("A%d", idxN+1), valN)
+		for idxN, valN := range NameList {
+			f.SetCellValue("Sheet1", fmt.Sprintf("A%d", idxN+1), valN)
 		}
-		for idxS, valS := range simbolList {
-			f.SetCellValue("CoinList", fmt.Sprintf("B%d", idxS+1), valS)
+		for idxS, valS := range SimbolList {
+			f.SetCellValue("Sheet1", fmt.Sprintf("B%d", idxS+1), valS)
 		}
-		for idxP, valP := range priceList {
-			f.SetCellValue("CoinList", fmt.Sprintf("C%d", idxP+1), valP)
+		for idxP, valP := range PriceList {
+			f.SetCellValue("Sheet1", fmt.Sprintf("C%d", idxP+1), valP)
 		}
-		for idxC, valC := range capList {
-			f.SetCellValue("CoinList", fmt.Sprintf("D%d", idxC+1), valC)
+		for idxC, valC := range CapList {
+			f.SetCellValue("Sheet1", fmt.Sprintf("D%d", idxC+1), valC)
+		}
+		i++
+	}
+	if pathToSave == "" {
+		if err := f.SaveAs("Coins.xlsx"); err != nil {
+			log.Fatalf("Excel file creation error - %s", err)
+		}
+	} else {
+		if err := f.SaveAs(filepath.Join(pathToSave, "Coins.xlsx")); err != nil {
+			log.Fatalf("Excel file creation error - %s", err)
 		}
 	}
-	if err := f.SaveAs("Coins.xlsx"); err != nil {
-		fmt.Println(err)
-	}
-	// 2.325321123s or 3.132414124s or 4.015732478s
-	fmt.Println(time.Since(timeStart))
+	fmt.Println("Total execution time - ", time.Since(timeStart))
 }
 
-// Parce userConfig yaml
-func ParceUserConfig() (error, string, int64, string) {
+// Parce user сonfig...
+func ParceUserConfig() (error, string, int, string) {
 	var conf Config
 	file, err := ioutil.ReadFile("./config/config.yaml")
 	if err != nil {
@@ -92,5 +121,5 @@ func ParceUserConfig() (error, string, int64, string) {
 		return fmt.Errorf("err parce config file - %s", err), "", 0, ""
 	}
 
-	return nil, conf.TypeWallet, conf.NumberOfCoins, conf.PathToFolder
+	return nil, conf.TypeWallet, conf.NumbersOfCoins, conf.PathToFolder
 }

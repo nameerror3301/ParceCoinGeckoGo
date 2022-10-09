@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-   <img src="https://img.shields.io/badge/Golang-version%201.8.1-blue" alt="Golang">
+   <img src="https://img.shields.io/badge/Golang-version%201.18-blue" alt="Golang">
    <img src="https://img.shields.io/badge/ParceCoinGeckoGo-version%201.0-blue" alt="Project-Version">
 </p>
 

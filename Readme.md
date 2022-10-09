@@ -1,21 +1,32 @@
-# ParceDataCoinGecko
+<p align="center">
+      <img src="https://cryptocurrency.tech/wp-content/uploads/2020/12/coingecko.jpeg" width="726">
+</p>
 
-## This software collects coin data from the CoinGecko website. It is a commercial project.
+<p align="center">
+   <img src="https://img.shields.io/badge/Golang-version%201.8.1-blue" alt="Golang">
+   <img src="https://img.shields.io/badge/ParceCoinGeckoGo-version%201.0-blue" alt="Project-Version">
+</p>
 
-# Description
+## About
 
-    ## Amount of information
+This project was created on a commercial basis. The customer required to collect a selected number of coins from CoinGecko website and generate an Excel file with these coins.
 
-        In order to collect a certain amount of coins from a site, that is their information including Name Price Capitalization. In the config.yaml file, enter the number of pages from which data will be collected. The maximum number of pages is 130.
+## Documentation
 
-    ## The path of preservation
+The application runs on language version 1.18. 
 
-        You can also enter the path where the .exls file will be saved, it is also specified in the file config.yaml.
+So if you don't have the language installed you can install it at [link](https://go.dev/doc/install).
 
-    ## Selectable currency
+## Build
 
-        To edit the currency type in which the files will be received, enter the currency type in the config.yaml file. Euro Dollas USA.
+To run the application you need to go to **"config "** and fill in the configuration file called **"config.yaml "** then come back and go to **"cmd "** in the project root directory and run the file **"main.go "**.
 
-    # Warning
+You can run it with the command **"go run main.go "** or compile it into an executable file with the command **"go build -o main.go "**
 
-    The maximum number of requests is limited. In order to collect a large amount of information you have to wait.
+## Developers
+
+- [OneByteForLife](https://github.com/nameerror3301)
+
+## License
+
+- This software is protected under the MIT license!

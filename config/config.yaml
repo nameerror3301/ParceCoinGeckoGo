@@ -5,4 +5,4 @@ TypeWallet: "eur"
 NumbersOfCoins: 5
 
 # Path where the file will be saved...
-PathToFolder: "/home/onebyteforlife/go/src"
+PathToFolder: "/home/onebyteforlife/go/src/"

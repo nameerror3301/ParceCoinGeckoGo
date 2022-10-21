@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/xuri/excelize/v2"
@@ -55,8 +56,9 @@ func main() {
 		log.Fatal("The number of pages can not be more than 130 or less than/equal to zero.")
 	}
 
-	// Fix this Crutch
+	var wg sync.WaitGroup
 	for i := 1; i < numCoins+1; {
+		wg.Add(5)
 		url := fmt.Sprintf("https://api.coingecko.com/api/v3/coins/markets?vs_currency=%s&order=market_cap_desc&per_page=100&page=%d&sparkline=false", typeWallet, i)
 		resp, err := http.Get(url)
 		if err != nil {
@@ -75,28 +77,50 @@ func main() {
 		}
 		fmt.Printf("Visited page - %d of %d\n", i, numCoins)
 
-		for _, val := range data {
-			NameList = append(NameList, val.CoinName)
-			PriceList = append(PriceList, val.CoinPrice)
-			SimbolList = append(SimbolList, val.CoinSimbol)
-			CapList = append(CapList, val.MarcetCapitalization)
-		}
+		go func() {
+			for _, val := range data {
+				NameList = append(NameList, val.CoinName)
+				PriceList = append(PriceList, val.CoinPrice)
+				SimbolList = append(SimbolList, val.CoinSimbol)
+				CapList = append(CapList, val.MarcetCapitalization)
+			}
+			wg.Done()
+		}()
 
-		// Add more process ... wait..
-		for idxN, valN := range NameList {
-			f.SetCellValue("Sheet1", fmt.Sprintf("A%d", idxN+1), valN)
-		}
-		for idxS, valS := range SimbolList {
-			f.SetCellValue("Sheet1", fmt.Sprintf("B%d", idxS+1), valS)
-		}
-		for idxP, valP := range PriceList {
-			f.SetCellValue("Sheet1", fmt.Sprintf("C%d", idxP+1), valP)
-		}
-		for idxC, valC := range CapList {
-			f.SetCellValue("Sheet1", fmt.Sprintf("D%d", idxC+1), valC)
-		}
+		go func() {
+			for idxN, valN := range NameList {
+				f.SetCellValue("Sheet1", fmt.Sprintf("A%d", idxN+1), valN)
+			}
+			fmt.Println("1")
+			wg.Done()
+		}()
+
+		go func() {
+			for idxS, valS := range SimbolList {
+				f.SetCellValue("Sheet1", fmt.Sprintf("B%d", idxS+1), valS)
+			}
+			fmt.Println("2")
+			wg.Done()
+		}()
+
+		go func() {
+			for idxP, valP := range PriceList {
+				f.SetCellValue("Sheet1", fmt.Sprintf("C%d", idxP+1), valP)
+			}
+			fmt.Println("3")
+			wg.Done()
+		}()
+
+		go func() {
+			for idxC, valC := range CapList {
+				f.SetCellValue("Sheet1", fmt.Sprintf("D%d", idxC+1), valC)
+			}
+			fmt.Println("4")
+			wg.Done()
+		}()
 		i++
 	}
+	wg.Wait()
 	if pathToSave == "" {
 		if err := f.SaveAs("Coins.xlsx"); err != nil {
 			log.Fatalf("Excel file creation error - %s", err)

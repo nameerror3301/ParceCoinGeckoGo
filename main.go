@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+	"runtime"
 	"sync"
 	"time"
 
@@ -36,6 +37,7 @@ var (
 
 func main() {
 	timeStart := time.Now()
+	runtime.GOMAXPROCS(runtime.NumCPU())
 	f := excelize.NewFile()
 	var data []DataCoin
 
@@ -121,6 +123,7 @@ func main() {
 		i++
 	}
 	wg.Wait()
+
 	if pathToSave == "" {
 		if err := f.SaveAs("Coins.xlsx"); err != nil {
 			log.Fatalf("Excel file creation error - %s", err)

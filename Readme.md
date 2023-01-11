@@ -25,7 +25,7 @@ You can run it with the command **"go run main.go "** or compile it into an exec
 
 ## Developers
 
-- [OneByteForLife](https://github.com/nameerror3301)
+- [OneByteForLife](https://github.com/OneByteForLife)
 
 ## License
 
